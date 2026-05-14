@@ -10,9 +10,14 @@ class Marca extends Model
 
     public function rules(){
         return [
-            'nome' => 'required|unique:marcas|min:3',
+            'nome' => 'required|unique:marcas,nome,'.$this->id.'|min:3',
             'imagem' => 'required'
         ];
+        /* - Padrão da validação unique:
+            1) Tabela
+            2) Nome da coluna que será pesquisada na tabela
+            3) ID do registro que será desconsiderado na pesquisa
+        */
     }
 
     public function feedback(){
