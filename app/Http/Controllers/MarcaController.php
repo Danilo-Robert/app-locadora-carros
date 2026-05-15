@@ -108,8 +108,8 @@ class MarcaController extends Controller
         $imagem_urn = $imagem->store('imagens', 'public');
         
         $marca->update([
-            'nome' => $request->nome,
-            'imagem' => $imagem_urn
+            'nome' => ($request->nome == null) ? $marca->nome : $request->nome,
+            'imagem' => ($imagem_urn == null) ? $marca->imagem : $imagem_urn
         ]);
 
         return response()->json($marca, 200);
@@ -125,6 +125,8 @@ class MarcaController extends Controller
         if($marca === null){
             return response()->json(['erro' => 'Impossível realizar a exclusão. O recurso solicitado não existe'], 404);
         }
+
+        Storage::disk('public')->delete($marca->imagem);
 
         $marca->delete();
         return response()->json(['msg' => 'A marca foi removida com sucesso'], 200);
