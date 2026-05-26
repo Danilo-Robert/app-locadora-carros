@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\Storage;
 
 class ModeloController extends Controller
 {
-    public function __construct(Modelo $modelo){
+    public function __construct(Modelo $modelo)
+    {
 
         $this->modelo = $modelo;
-
     }
     /**
      * Display a listing of the resource.
@@ -21,21 +21,25 @@ class ModeloController extends Controller
 
         $modelos = array();
 
-        if($request->has('atributos_marca')){
+        if ($request->has('atributos_marca')) {
             $atributos_marca = $request->atributos_marca;
-            $modelos = $this->modelo->with('marca:id,'.$atributos_marca);
+            $modelos = $this->modelo->with('marca:id,' . $atributos_marca);
         } else {
             $modelos = $this->modelo->with('marca');
         }
 
-        if($request->has('filtro')){
-            $condicoes = explode(':', $request->filtro);
-            $modelos = $modelos->where($condicoes[0], $condicoes[1], $condicoes[2]);
+        if ($request->has('filtro')) {
+            $filtros = explode(';', $request->filtro);
+            foreach ($filtros as $key => $condicao) {
+
+                $c = explode(':', $condicao);
+                $modelos = $modelos->where($c[0], $c[1], $c[2]);
+            }
         }
 
-        if($request->has('atributos')){
+        if ($request->has('atributos')) {
             $atributos = $request->atributos;
-            
+
             $modelos = $modelos->selectRaw($atributos)->get();
         } else {
             $modelos = $modelos->get();
@@ -81,8 +85,8 @@ class ModeloController extends Controller
     public function show($id)
     {
         $modelo = $this->modelo->with('marca')->find($id);
-        if($modelo === null){
-            return response()->json(['erro' => 'Recurso pesquisado não existe'], 404) ;
+        if ($modelo === null) {
+            return response()->json(['erro' => 'Recurso pesquisado não existe'], 404);
         }
 
         return response()->json($modelo, 200);
@@ -103,17 +107,17 @@ class ModeloController extends Controller
     {
         $modelo = $this->modelo->find($id);
 
-        if($modelo === null){
+        if ($modelo === null) {
             return response()->json(['erro' => 'Impossível realizar a atualização. O recurso solicitado não existe'], 404);
         }
 
-        if($request->method() === 'PATCH') {
+        if ($request->method() === 'PATCH') {
 
             $regrasDinamicas = array();
 
-            foreach($modelo->rules() as $input => $regra){
+            foreach ($modelo->rules() as $input => $regra) {
 
-                if(array_key_exists($input, $request->all())){
+                if (array_key_exists($input, $request->all())) {
                     $regrasDinamicas[$input] = $regra;
                 }
             }
@@ -123,13 +127,13 @@ class ModeloController extends Controller
             $request->validate($modelo->rules());
         }
 
-        if($request->file('imagem')){
+        if ($request->file('imagem')) {
             Storage::disk('public')->delete($modelo->imagem);
         }
 
         $imagem = $request->file('imagem');
         $imagem_urn = $imagem->store('imagens/modelos', 'public');
-        
+
         $modelo->update([
             'marca_id' => ($request->marca_id == null) ? $modelo->marca_id : $request->marca_id,
             'nome' => ($request->nome == null) ? $modelo->nome : $request->nome,
@@ -150,7 +154,7 @@ class ModeloController extends Controller
     {
         $modelo = $this->modelo->find($id);
 
-        if($modelo === null){
+        if ($modelo === null) {
             return response()->json(['erro' => 'Impossível realizar a exclusão. O recurso solicitado não existe'], 404);
         }
 
