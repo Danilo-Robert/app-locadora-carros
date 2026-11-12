@@ -4,11 +4,11 @@
     <div class="row justify-content-center">
       <div class="col-md-8">
         <div class="card">
-          <div class="card-header">Login (Component Vue)</div>
+          <div class="card-header">Login</div>
 
           <div class="card-body">
             <form method="POST" action="">
-
+              <input type="hidden" name="_token" :value="token_csrf">
               <div class="row mb-3">
                 <label
                   for="email"
@@ -88,5 +88,7 @@
 </template>
 
 <script>
-
+  export default {
+    props: ['token_csrf']
+  }
 </script>
